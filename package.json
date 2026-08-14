@@ -1,0 +1,10 @@
+{
+  "name": "protocolo-disc24",
+  "version": "0.2.0",
+  "private": true,
+  "description": "App de avaliação comportamental DISC-24 com registro local de resultados.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

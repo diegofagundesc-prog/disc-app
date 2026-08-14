@@ -162,7 +162,48 @@
     padding-top:16px;
     margin-top:24px;
   }
-  .footer-actions{display:flex; gap:10px; margin-top:22px;}
+  .footer-actions{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap;}
+  /* form fields */
+  .field{margin-bottom:18px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:6px;}
+  .field input{
+    width:100%;
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:11px 12px;
+    outline:none;
+    transition:border-color .12s ease;
+  }
+  .field input:focus{border-color:var(--ink-soft);}
+  .link-btn{
+    background:none; border:none; padding:0;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--ink-soft); text-decoration:underline; cursor:pointer;
+  }
+  .link-btn:hover{color:var(--ink);}
+  .status-msg{font-size:12px; margin-top:14px; color:var(--ink-soft);}
+  .status-msg.ok{color:var(--s-color);}
+  .status-msg.err{color:var(--d-color);}
+  /* saved results table */
+  .table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius);}
+  table.results-table{width:100%; border-collapse:collapse; font-size:13px;}
+  table.results-table th, table.results-table td{
+    text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  table.results-table th{
+    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.05em;
+    text-transform:uppercase; color:var(--ink-soft); background:var(--bg);
+  }
+  table.results-table tr:last-child td{border-bottom:none;}
+  .tag-cat{
+    font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:600;
+    padding:2px 6px; border-radius:2px; color:#fff;
+  }
   @media print{
     body{background:#fff;}
     .no-print{display:none !important;}
@@ -170,6 +211,7 @@
   }
   @media (max-width:480px){
     .chip-row{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -213,6 +255,7 @@ let blocks = buildBlocks();
 let current = 0;
 let answers = []; // {mais:cat, menos:cat}
 let sel = {mais:null, menos:null}; // index within current block words[]
+let participante = {nome:'', cargo:''};
 
 const app = document.getElementById('app');
 
@@ -220,18 +263,46 @@ function renderIntro(){
   app.innerHTML = `
     <div class="doc-head">
       <div class="code">Protocolo <strong>DISC-24</strong><br>Avaliação Comportamental</div>
-      <div class="code">v0.1 · protótipo</div>
+      <div class="code">v0.2 · piloto</div>
     </div>
     <div class="body-pad">
       <h1>Leitura de Perfil Comportamental</h1>
       <p>24 blocos de 4 palavras. Em cada bloco, marque a palavra que <strong>MAIS</strong> combina com você e a que <strong>MENOS</strong> combina. Responda pelo instinto, não pelo que soa "correto" — não há resposta certa.</p>
-      <p>Leva cerca de 6 a 8 minutos. Os resultados ficam apenas neste navegador — nada é enviado a nenhum servidor nesta versão.</p>
-      <button class="btn" onclick="startQuiz()">Iniciar avaliação →</button>
+      <p>Leva cerca de 6 a 8 minutos. O resultado é salvo localmente neste computador (pasta do projeto) — nada é enviado para fora dele.</p>
+      <div class="field-row">
+        <div class="field">
+          <div class="instr">Nome completo</div>
+          <input type="text" id="inpNome" placeholder="Ex.: Maria Silva" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field">
+          <div class="instr">Cargo / função</div>
+          <input type="text" id="inpCargo" placeholder="Ex.: Vendedor de campo" maxlength="120" autocomplete="off">
+        </div>
+      </div>
+      <button class="btn" id="startBtn" disabled onclick="startQuiz()">Iniciar avaliação →</button>
+      <div style="margin-top:18px;">
+        <button class="link-btn" onclick="renderSavedResults()">Ver resultados salvos →</button>
+      </div>
     </div>
   `;
+  const inpNome = document.getElementById('inpNome');
+  const inpCargo = document.getElementById('inpCargo');
+  const startBtn = document.getElementById('startBtn');
+  function checkValid(){
+    startBtn.disabled = !(inpNome.value.trim().length>0 && inpCargo.value.trim().length>0);
+  }
+  inpNome.value = participante.nome;
+  inpCargo.value = participante.cargo;
+  inpNome.addEventListener('input', checkValid);
+  inpCargo.addEventListener('input', checkValid);
+  checkValid();
 }
 
 function startQuiz(){
+  const nome = document.getElementById('inpNome').value.trim();
+  const cargo = document.getElementById('inpCargo').value.trim();
+  if(!nome || !cargo) return;
+  participante = {nome, cargo};
   current = 0; answers = []; sel = {mais:null, menos:null};
   blocks = buildBlocks();
   renderQuiz();
@@ -249,6 +320,7 @@ function renderQuiz(){
       <div class="code">Bloco ${current+1} / 24</div>
     </div>
     <div class="body-pad">
+      <div class="code" style="margin-bottom:16px;">${escapeHtml(participante.nome)} · ${escapeHtml(participante.cargo)}</div>
       <div class="progress-row">
         <div class="progress-track">${ticks}</div>
       </div>
@@ -323,19 +395,138 @@ function renderResults(){
     </div>
     <div class="body-pad">
       <h2>Leitura Comportamental</h2>
+      <p style="margin-top:-6px;">${escapeHtml(participante.nome)} · ${escapeHtml(participante.cargo)}</p>
       ${bars}
       <div class="primary-block">
         <div class="code" style="margin-bottom:6px;">Perfil predominante: ${primary} · ${CAT_LABELS[primary]} — apoiado por ${secondary} · ${CAT_LABELS[secondary]}</div>
         <p style="margin:0;">${CAT_TEXT[primary]}</p>
       </div>
+      <div id="saveStatus" class="status-msg">Salvando resultado...</div>
       <div class="disclaimer">
-        Ferramenta de autoconhecimento e coaching comportamental baseada na teoria de William Moulton Marston (1928, domínio público). Não é laudo psicológico nem deve ser usada isoladamente para decisão de contratação ou demissão. Protótipo local — nenhum dado é armazenado ou transmitido.
+        Ferramenta de autoconhecimento e coaching comportamental baseada na teoria de William Moulton Marston (1928, domínio público). Não é laudo psicológico nem deve ser usada isoladamente para decisão de contratação ou demissão. Resultado salvo apenas localmente, na pasta do projeto — nenhum dado é enviado para fora deste computador.
       </div>
       <div class="footer-actions no-print">
-        <button class="btn-ghost btn" onclick="renderIntro()">Refazer</button>
+        <button class="btn-ghost btn" onclick="renderIntro()">Novo teste</button>
+        <button class="btn-ghost btn" onclick="renderSavedResults()">Ver resultados salvos</button>
         <button class="btn" onclick="window.print()">Exportar / imprimir</button>
       </div>
     </div>
+  `;
+
+  salvarResultado({
+    nome: participante.nome,
+    cargo: participante.cargo,
+    scores: net,
+    perfilPrimario: primary,
+    perfilSecundario: secondary
+  });
+}
+
+async function salvarResultado(payload){
+  const setStatus = (text, cls) => {
+    const el = document.getElementById('saveStatus');
+    if(!el) return;
+    el.textContent = text;
+    el.className = 'status-msg' + (cls ? ' '+cls : '');
+    return el;
+  };
+  setStatus('Salvando resultado...', '');
+  try{
+    const res = await fetch('/api/resultados', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Falha ao salvar');
+    setStatus('Resultado salvo localmente ✓', 'ok');
+  }catch(e){
+    const el = setStatus('', 'err');
+    if(!el) return;
+    el.appendChild(document.createTextNode('Não foi possível salvar automaticamente. Verifique se o servidor local (node server.js) está rodando. '));
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'link-btn';
+    retryBtn.textContent = 'Tentar novamente';
+    retryBtn.onclick = () => salvarResultado(payload);
+    el.appendChild(retryBtn);
+  }
+}
+
+function fmtScore(v){
+  if(typeof v !== 'number') return '—';
+  return (v>0?'+':'') + v;
+}
+
+function escapeHtml(str){
+  if(str==null) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+async function renderSavedResults(){
+  app.innerHTML = `
+    <div class="doc-head">
+      <div class="code">Protocolo <strong>DISC-24</strong><br>Resultados salvos</div>
+      <div class="code">Piloto</div>
+    </div>
+    <div class="body-pad">
+      <h2>Testes registrados</h2>
+      <p>Lista das avaliações concluídas, salvas localmente em <code>data/resultados.json</code>.</p>
+      <div id="resultsArea"><p class="hint">Carregando...</p></div>
+      <div class="footer-actions no-print">
+        <button class="btn-ghost btn" onclick="renderIntro()">← Voltar</button>
+        <button class="btn-ghost btn" onclick="renderSavedResults()">Atualizar</button>
+      </div>
+    </div>
+  `;
+  const area = document.getElementById('resultsArea');
+  try{
+    const res = await fetch('/api/resultados');
+    if(!res.ok) throw new Error('Falha ao carregar');
+    const list = await res.json();
+    if(!list.length){
+      area.innerHTML = '<p class="hint">Nenhum teste registrado ainda.</p>';
+      return;
+    }
+    area.innerHTML = buildResultsTable(list);
+  }catch(e){
+    area.innerHTML = '<p class="status-msg err">Não foi possível carregar os resultados. Verifique se o servidor local (node server.js) está rodando.</p>';
+  }
+}
+
+function buildResultsTable(list){
+  let rows = '';
+  list.forEach(r => {
+    const s = r.scores || {};
+    const dataFmt = r.data ? new Date(r.data).toLocaleString('pt-BR') : '—';
+    const primCat = r.perfilPrimario;
+    const primColor = CAT_COLOR[primCat] || 'var(--ink-soft)';
+    rows += `
+      <tr>
+        <td>${escapeHtml(r.nome)}</td>
+        <td>${escapeHtml(r.cargo)}</td>
+        <td><span class="tag-cat" style="background:${primColor}">${escapeHtml(primCat || '—')}</span>${r.perfilSecundario ? ' / '+escapeHtml(r.perfilSecundario) : ''}</td>
+        <td>${fmtScore(s.D)}</td>
+        <td>${fmtScore(s.I)}</td>
+        <td>${fmtScore(s.S)}</td>
+        <td>${fmtScore(s.C)}</td>
+        <td>${dataFmt}</td>
+      </tr>
+    `;
+  });
+  return `
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead>
+          <tr><th>Nome</th><th>Cargo</th><th>Perfil</th><th>D</th><th>I</th><th>S</th><th>C</th><th>Data</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:10px;">${list.length} teste(s) registrado(s).</p>
   `;
 }
 
