@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocolo DISC-24 — Leitura Comportamental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF1EF;
+    --surface: #FFFFFF;
+    --ink: #142430;
+    --ink-soft: #4B5B63;
+    --line: #D7DEDB;
+    --d-color: #C1440E;
+    --i-color: #B8860B;
+    --s-color: #2E7D6B;
+    --c-color: #2C4A7C;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:48px 20px 80px;
+  }
+  .doc{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 1px 2px rgba(20,36,48,0.04);
+  }
+  .doc-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding:22px 28px;
+    border-bottom:1px solid var(--line);
+  }
+  .code{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .code strong{color:var(--ink);}
+  h1{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  h2{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:600;
+    font-size:19px;
+    margin:0 0 10px;
+  }
+  p{color:var(--ink-soft); margin:0 0 14px;}
+  .body-pad{padding:28px;}
+  .btn{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:13px 22px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:opacity .15s ease;
+  }
+  .btn:hover{opacity:0.85;}
+  .btn:disabled{background:var(--line); color:var(--ink-soft); cursor:not-allowed;}
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  /* progress */
+  .progress-row{display:flex; align-items:center; gap:10px; margin-bottom:26px;}
+  .progress-track{
+    flex:1;
+    height:4px;
+    background:var(--line);
+    position:relative;
+    display:flex;
+    gap:2px;
+  }
+  .tick{flex:1; background:var(--line);}
+  .tick.done{background:var(--ink);}
+  .progress-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  /* quiz */
+  .instr{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .chip-row{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+    margin-bottom:26px;
+  }
+  .chip{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 14px;
+    background:#fff;
+    cursor:pointer;
+    font-size:15px;
+    text-align:left;
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .chip:hover{border-color:var(--ink-soft);}
+  .chip.selected-mais{border-color:var(--s-color); background:rgba(46,125,107,0.08); font-weight:600;}
+  .chip.selected-menos{border-color:var(--d-color); background:rgba(193,68,14,0.07); font-weight:600;}
+  .chip.disabled{opacity:0.35; cursor:not-allowed;}
+  .quiz-actions{display:flex; justify-content:space-between; align-items:center;}
+  .hint{font-size:12px; color:var(--ink-soft);}
+  /* results */
+  .bar-row{margin-bottom:20px;}
+  .bar-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:5px;
+  }
+  .bar-label .name{font-weight:600; font-size:14px;}
+  .bar-label .pts{font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--ink-soft);}
+  .bar-track{height:10px; background:var(--bg); border:1px solid var(--line); border-radius:2px; overflow:hidden;}
+  .bar-fill{height:100%; transition:width .5s ease;}
+  .primary-block{
+    border-left:3px solid var(--ink);
+    padding:16px 18px;
+    background:var(--bg);
+    margin:24px 0;
+  }
+  .disclaimer{
+    font-size:12px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:16px;
+    margin-top:24px;
+  }
+  .footer-actions{display:flex; gap:10px; margin-top:22px;}
+  @media print{
+    body{background:#fff;}
+    .no-print{display:none !important;}
+    .doc{border:none; box-shadow:none;}
+  }
+  @media (max-width:480px){
+    .chip-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="doc" id="app"></div></div>
+
+<script>
+const D_WORDS = ["Decidido","Direto","Competitivo","Ousado","Enérgico","Firme","Independente","Assertivo","Desafiador","Determinado","Impositivo","Audacioso","Confiante","Exigente","Resoluto","Pioneiro","Corajoso","Autoritário","Ambicioso","Persistente","Forte","Dominante","Vigoroso","Impaciente"];
+const I_WORDS = ["Comunicativo","Entusiasmado","Sociável","Persuasivo","Otimista","Expressivo","Espontâneo","Amigável","Carismático","Falante","Animado","Extrovertido","Caloroso","Inspirador","Divertido","Popular","Envolvente","Charmoso","Vibrante","Encantador","Efusivo","Cativante","Descontraído","Alegre"];
+const S_WORDS = ["Paciente","Calmo","Leal","Constante","Confiável","Gentil","Cooperativo","Estável","Ponderado","Amável","Consistente","Prestativo","Sereno","Dedicado","Compreensivo","Tranquilo","Solidário","Acolhedor","Modesto","Previsível","Harmonioso","Atencioso","Discreto","Conciliador"];
+const C_WORDS = ["Preciso","Analítico","Cuidadoso","Organizado","Detalhista","Sistemático","Criterioso","Metódico","Cauteloso","Lógico","Disciplinado","Exato","Rigoroso","Formal","Prudente","Meticuloso","Correto","Perfeccionista","Ordenado","Racional","Minucioso","Reservado","Diplomático","Investigativo"];
+
+const CAT_LABELS = {D:"Dominância", I:"Influência", S:"Estabilidade", C:"Conformidade"};
+const CAT_COLOR  = {D:"var(--d-color)", I:"var(--i-color)", S:"var(--s-color)", C:"var(--c-color)"};
+const CAT_TEXT = {
+  D: "Foco em resultado e velocidade de decisão. Em campo, tende a fechar rápido e não teme objeção — mas pode pular etapa de relacionamento e gerar atrito com cliente que precisa de mais processo. Fit natural para negociação de conta grande e meta agressiva.",
+  I: "Constrói relação e confiança rápido; bom em prospecção e em carteira onde o vínculo pessoal pesa mais que preço. Risco: prometer além do que a operação entrega e negligenciar burocracia — pedido, prazo, cobrança.",
+  S: "Consistente e confiável, mantém carteira estável e fideliza cliente antigo. Resiste a mudança de rotina e evita confronto — pode não puxar reposicionamento de preço ou cobrança de inadimplência com firmeza.",
+  C: "Preciso e orientado a processo — ótimo para controle de margem, CRM correto e conformidade regulatória (relevante em farma). Pode travar em análise excessiva antes de decidir e sofrer com a pressão social da venda."
+};
+
+function buildBlocks(){
+  const blocks = [];
+  for(let i=0;i<24;i++){
+    const words = [
+      {word:D_WORDS[i], cat:'D'},
+      {word:I_WORDS[i], cat:'I'},
+      {word:S_WORDS[i], cat:'S'},
+      {word:C_WORDS[i], cat:'C'}
+    ];
+    for(let j=words.length-1;j>0;j--){
+      const k = Math.floor(Math.random()*(j+1));
+      [words[j],words[k]] = [words[k],words[j]];
+    }
+    blocks.push(words);
+  }
+  return blocks;
+}
+
+let blocks = buildBlocks();
+let current = 0;
+let answers = []; // {mais:cat, menos:cat}
+let sel = {mais:null, menos:null}; // index within current block words[]
+
+const app = document.getElementById('app');
+
+function renderIntro(){
+  app.innerHTML = `
+    <div class="doc-head">
+      <div class="code">Protocolo <strong>DISC-24</strong><br>Avaliação Comportamental</div>
+      <div class="code">v0.1 · protótipo</div>
+    </div>
+    <div class="body-pad">
+      <h1>Leitura de Perfil Comportamental</h1>
+      <p>24 blocos de 4 palavras. Em cada bloco, marque a palavra que <strong>MAIS</strong> combina com você e a que <strong>MENOS</strong> combina. Responda pelo instinto, não pelo que soa "correto" — não há resposta certa.</p>
+      <p>Leva cerca de 6 a 8 minutos. Os resultados ficam apenas neste navegador — nada é enviado a nenhum servidor nesta versão.</p>
+      <button class="btn" onclick="startQuiz()">Iniciar avaliação →</button>
+    </div>
+  `;
+}
+
+function startQuiz(){
+  current = 0; answers = []; sel = {mais:null, menos:null};
+  blocks = buildBlocks();
+  renderQuiz();
+}
+
+function renderQuiz(){
+  const words = blocks[current];
+  let ticks = '';
+  for(let i=0;i<24;i++){
+    ticks += `<div class="tick ${i<current ? 'done':''}"></div>`;
+  }
+  app.innerHTML = `
+    <div class="doc-head">
+      <div class="code">Protocolo <strong>DISC-24</strong></div>
+      <div class="code">Bloco ${current+1} / 24</div>
+    </div>
+    <div class="body-pad">
+      <div class="progress-row">
+        <div class="progress-track">${ticks}</div>
+      </div>
+      <div class="instr">O que MAIS te representa</div>
+      <div class="chip-row" id="row-mais"></div>
+      <div class="instr">O que MENOS te representa</div>
+      <div class="chip-row" id="row-menos"></div>
+      <div class="quiz-actions">
+        <span class="hint">Selecione uma palavra em cada linha</span>
+        <button class="btn" id="nextBtn" disabled onclick="nextBlock()">Próximo →</button>
+      </div>
+    </div>
+  `;
+  const rowMais = document.getElementById('row-mais');
+  const rowMenos = document.getElementById('row-menos');
+  words.forEach((w, idx) => {
+    const bMais = document.createElement('button');
+    bMais.className = 'chip' + (sel.mais===idx ? ' selected-mais':'') + (sel.menos===idx ? ' disabled':'');
+    bMais.textContent = w.word;
+    bMais.disabled = sel.menos===idx;
+    bMais.onclick = () => { sel.mais = (sel.mais===idx? null: idx); renderQuiz(); };
+    rowMais.appendChild(bMais);
+
+    const bMenos = document.createElement('button');
+    bMenos.className = 'chip' + (sel.menos===idx ? ' selected-menos':'') + (sel.mais===idx ? ' disabled':'');
+    bMenos.textContent = w.word;
+    bMenos.disabled = sel.mais===idx;
+    bMenos.onclick = () => { sel.menos = (sel.menos===idx? null: idx); renderQuiz(); };
+    rowMenos.appendChild(bMenos);
+  });
+  document.getElementById('nextBtn').disabled = !(sel.mais!==null && sel.menos!==null);
+}
+
+function nextBlock(){
+  const words = blocks[current];
+  answers.push({mais: words[sel.mais].cat, menos: words[sel.menos].cat});
+  sel = {mais:null, menos:null};
+  current++;
+  if(current >= 24){
+    renderResults();
+  } else {
+    renderQuiz();
+  }
+}
+
+function renderResults(){
+  const net = {D:0,I:0,S:0,C:0};
+  answers.forEach(a => { net[a.mais]++; net[a.menos]--; });
+  const order = ['D','I','S','C'].sort((a,b) => net[b]-net[a]);
+  const primary = order[0];
+  const secondary = order[1];
+  const maxAbs = 24;
+
+  let bars = '';
+  ['D','I','S','C'].forEach(cat => {
+    const pct = ((net[cat] + maxAbs) / (2*maxAbs)) * 100;
+    bars += `
+      <div class="bar-row">
+        <div class="bar-label">
+          <span class="name">${cat} · ${CAT_LABELS[cat]}</span>
+          <span class="pts">${net[cat] > 0 ? '+' : ''}${net[cat]} pts</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${CAT_COLOR[cat]}"></div></div>
+      </div>
+    `;
+  });
+
+  app.innerHTML = `
+    <div class="doc-head">
+      <div class="code">Protocolo <strong>DISC-24</strong><br>Resultado</div>
+      <div class="code">${new Date().toLocaleDateString('pt-BR')}</div>
+    </div>
+    <div class="body-pad">
+      <h2>Leitura Comportamental</h2>
+      ${bars}
+      <div class="primary-block">
+        <div class="code" style="margin-bottom:6px;">Perfil predominante: ${primary} · ${CAT_LABELS[primary]} — apoiado por ${secondary} · ${CAT_LABELS[secondary]}</div>
+        <p style="margin:0;">${CAT_TEXT[primary]}</p>
+      </div>
+      <div class="disclaimer">
+        Ferramenta de autoconhecimento e coaching comportamental baseada na teoria de William Moulton Marston (1928, domínio público). Não é laudo psicológico nem deve ser usada isoladamente para decisão de contratação ou demissão. Protótipo local — nenhum dado é armazenado ou transmitido.
+      </div>
+      <div class="footer-actions no-print">
+        <button class="btn-ghost btn" onclick="renderIntro()">Refazer</button>
+        <button class="btn" onclick="window.print()">Exportar / imprimir</button>
+      </div>
+    </div>
+  `;
+}
+
+renderIntro();
+</script>
+</body>
+</html>
