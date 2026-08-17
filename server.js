@@ -5,12 +5,22 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = __dirname;
 const HTML_FILE = path.join(ROOT_DIR, 'protocolo-disc24.html');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'resultados.json');
+
+const AUTH_USER = 'disc';
+const AUTH_PASSWORD = process.env.DISC_APP_PASSWORD;
+
+if(!AUTH_PASSWORD){
+  console.error('ERRO: defina a variável de ambiente DISC_APP_PASSWORD antes de iniciar o servidor.');
+  console.error('Ex.: DISC_APP_PASSWORD="sua-senha" node server.js');
+  process.exit(1);
+}
 
 function ensureDataFile(){
   if(!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, {recursive:true});
@@ -67,7 +77,43 @@ function isFiniteNumber(v){
 
 const PERFIS_TESTE_VALIDOS = ['televendas', 'lideranca'];
 
+function timingSafeEqualStr(a, b){
+  const bufA = Buffer.from(String(a), 'utf8');
+  const bufB = Buffer.from(String(b), 'utf8');
+  if(bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+function isAuthorized(req){
+  const header = req.headers['authorization'] || '';
+  if(!header.startsWith('Basic ')) return false;
+  let decoded;
+  try{
+    decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+  }catch(e){
+    return false;
+  }
+  const sep = decoded.indexOf(':');
+  if(sep === -1) return false;
+  const user = decoded.slice(0, sep);
+  const pass = decoded.slice(sep + 1);
+  return timingSafeEqualStr(user, AUTH_USER) && timingSafeEqualStr(pass, AUTH_PASSWORD);
+}
+
+function requireAuth(res){
+  res.writeHead(401, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'WWW-Authenticate': 'Basic realm="Protocolo DISC-24"'
+  });
+  res.end('Autenticação necessária.');
+}
+
 const server = http.createServer(async (req, res) => {
+  if(!isAuthorized(req)){
+    requireAuth(res);
+    return;
+  }
+
   const urlPath = req.url.split('?')[0];
 
   if(req.method === 'GET' && urlPath === '/api/resultados'){
@@ -123,5 +169,6 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   ensureDataFile();
   console.log(`Protocolo DISC-24 rodando em http://localhost:${PORT}`);
+  console.log(`Acesso protegido por senha — usuário: ${AUTH_USER}`);
   console.log(`Resultados salvos em ${DATA_FILE}`);
 });

@@ -8,19 +8,44 @@ servido por um servidor Node local sem dependências externas.
 
 Requer apenas Node.js (sem `npm install` — o servidor usa só módulos nativos).
 
+O acesso ao app inteiro é protegido por senha única (HTTP Basic Auth, usuário
+fixo `disc`). Defina a senha na variável de ambiente `DISC_APP_PASSWORD`
+antes de iniciar — o servidor recusa subir sem ela:
+
 ```
-node server.js
+DISC_APP_PASSWORD="sua-senha-aqui" node server.js
 ```
 
-Abra `http://localhost:3000` no navegador. Cada pessoa preenche nome e cargo,
-responde aos 24 blocos e o resultado é salvo automaticamente.
+Abra `http://localhost:3000` no navegador — o navegador vai pedir usuário
+(`disc`) e a senha definida. Depois de autenticado, cada pessoa preenche
+nome, cargo e perfil do teste, responde aos 24 blocos e o resultado é salvo
+automaticamente.
 
 ## Onde ficam os dados
 
 Os resultados são gravados em `data/resultados.json` (criado automaticamente
-na primeira execução). Esse arquivo é local — nada é enviado para fora do
-computador onde o servidor está rodando. O arquivo é ignorado pelo git
-(`.gitignore`) porque contém dados pessoais dos avaliados.
+na primeira execução). O arquivo é ignorado pelo git (`.gitignore`) porque
+contém dados pessoais dos avaliados. Rodando localmente, esse arquivo fica só
+na máquina onde o servidor está ativo; se o app estiver publicado (ex.:
+Render), os dados ficam no servidor da aplicação, acessível apenas a quem
+tem a senha.
+
+## Deploy no Render
+
+O servidor já lê a porta de `process.env.PORT` (padrão do Render) e não
+precisa de build step — o comando de start é `node server.js`.
+
+Para configurar a senha de acesso no Render:
+
+1. Abra o serviço no [dashboard do Render](https://dashboard.render.com).
+2. Vá em **Environment** (menu lateral do serviço).
+3. Em **Environment Variables**, clique em **Add Environment Variable**.
+4. Preencha `Key` com `DISC_APP_PASSWORD` e `Value` com a senha escolhida.
+5. Clique em **Save Changes** — o Render reinicia o serviço automaticamente
+   com a nova variável.
+
+Sem essa variável definida, o servidor não sobe (falha proposital, pra evitar
+publicar o app sem proteção).
 
 ## Ver resultados do piloto
 
@@ -30,9 +55,11 @@ perfil predominante, pontuação D/I/S/C e data.
 
 ## Escopo atual (piloto)
 
-Implementado: formulário de identificação, aplicação do teste, cálculo de
-pontuação líquida, gravação local e listagem de resultados salvos.
+Implementado: formulário de identificação, seleção de perfil do teste
+(televendas/liderança), aplicação do teste, cálculo de pontuação líquida,
+gravação dos resultados, listagem em "Resultados salvos" e trava de acesso
+por senha única compartilhada (HTTP Basic Auth).
 
 Deliberadamente fora de escopo por enquanto (fase 2, após validar o piloto):
-autenticação, dashboard de administração, exportação em PDF dedicada e tela
-de consentimento LGPD.
+login individual por usuário, dashboard de administração, exportação em PDF
+dedicada e tela de consentimento LGPD.

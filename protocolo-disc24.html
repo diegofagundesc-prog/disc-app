@@ -626,7 +626,7 @@ function renderIntro(){
     <div class="body-pad">
       <h1>Leitura de Perfil Comportamental</h1>
       <p>24 blocos de 4 palavras. Em cada bloco, marque a palavra que <strong>MAIS</strong> combina com você e a que <strong>MENOS</strong> combina. Responda pelo instinto, não pelo que soa "correto" — não há resposta certa.</p>
-      <p>Leva cerca de 6 a 8 minutos. O resultado é salvo localmente neste computador (pasta do projeto) — nada é enviado para fora dele.</p>
+      <p>Leva cerca de 6 a 8 minutos. O resultado fica armazenado no servidor do aplicativo, acessível apenas a quem tem a senha de acesso.</p>
       <div class="field-row">
         <div class="field">
           <div class="instr">Nome completo</div>
@@ -773,7 +773,7 @@ function renderResults(){
       </div>
       <div id="saveStatus" class="status-msg">Salvando resultado...</div>
       <div class="disclaimer">
-        Ferramenta de autoconhecimento e coaching comportamental baseada na teoria de William Moulton Marston (1928, domínio público). Não é laudo psicológico nem deve ser usada isoladamente para decisão de contratação ou demissão. Resultado salvo apenas localmente, na pasta do projeto — nenhum dado é enviado para fora deste computador.
+        Ferramenta de autoconhecimento e coaching comportamental baseada na teoria de William Moulton Marston (1928, domínio público). Não é laudo psicológico nem deve ser usada isoladamente para decisão de contratação ou demissão. Dados armazenados no servidor do aplicativo, acessível apenas a quem tem a senha.
       </div>
       <div class="footer-actions no-print">
         <button class="btn-ghost btn" onclick="renderIntro()">Novo teste</button>
@@ -809,7 +809,7 @@ async function salvarResultado(payload){
       body: JSON.stringify(payload)
     });
     if(!res.ok) throw new Error('Falha ao salvar');
-    setStatus('Resultado salvo localmente ✓', 'ok');
+    setStatus('Resultado salvo ✓', 'ok');
   }catch(e){
     const el = setStatus('', 'err');
     if(!el) return;
