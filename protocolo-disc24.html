@@ -190,6 +190,20 @@
     transition:border-color .12s ease;
   }
   .field input:focus{border-color:var(--ink-soft);}
+  .field select{
+    width:100%;
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:11px 12px;
+    outline:none;
+    cursor:pointer;
+    transition:border-color .12s ease;
+  }
+  .field select:focus{border-color:var(--ink-soft);}
   .link-btn{
     background:none; border:none; padding:0;
     font-family:'JetBrains Mono', monospace;
@@ -229,7 +243,7 @@
 <div class="wrap"><div class="doc" id="app"></div></div>
 
 <script>
-const BLOCKS = [
+const BLOCKS_TELEVENDAS = [
   { situacao: "Um cliente liga reclamando que o pedido chegou errado.",
     opcoes: [
       {texto:"Resolve na hora, promete a troca e já parte pro próximo cliente.", cat:"D"},
@@ -400,6 +414,180 @@ const BLOCKS = [
     ]}
 ];
 
+const BLOCKS_LIDERANCA = [
+  { situacao: "Duas pessoas da sua equipe entram em atrito na frente do time.",
+    opcoes: [
+      {texto:"Interrompe na hora e decide ali quem tem razão, sem alongar a discussão.", cat:"D"},
+      {texto:"Conversa com bom humor pra baixar a tensão antes de tratar do assunto sério.", cat:"I"},
+      {texto:"Chama os dois de lado, com calma, pra evitar expor o conflito na frente do grupo.", cat:"S"},
+      {texto:"Marca uma conversa individual com cada um antes de tirar qualquer conclusão.", cat:"C"}
+    ]},
+  { situacao: "Você pede uma tarefa e uma pessoa da equipe não cumpre o prazo combinado.",
+    opcoes: [
+      {texto:"Cobra direto, sem rodeio, e já define novo prazo com consequência clara.", cat:"D"},
+      {texto:"Conversa, entende o motivo, e reforça o combinado de forma leve.", cat:"I"},
+      {texto:"Dá mais um tempo, evitando confronto, na esperança de que resolva.", cat:"S"},
+      {texto:"Pede o motivo por escrito antes de decidir como agir.", cat:"C"}
+    ]},
+  { situacao: "Alguém da equipe questiona uma decisão sua na frente dos outros.",
+    opcoes: [
+      {texto:"Reafirma a decisão com firmeza, sem abrir espaço pra debate ali.", cat:"D"},
+      {texto:"Explica o porquê com calma, tentando trazer a pessoa pro seu lado.", cat:"I"},
+      {texto:"Evita confronto direto ali, prefere conversar em particular depois.", cat:"S"},
+      {texto:"Explica a lógica com dados, mostrando o motivo objetivo da decisão.", cat:"C"}
+    ]},
+  { situacao: "Você assume uma posição de liderança nova, sem muito tempo de adaptação.",
+    opcoes: [
+      {texto:"Já começa dando direção clara pro time, mesmo sem conhecer todos ainda.", cat:"D"},
+      {texto:"Investe em criar relação com o time antes de qualquer mudança.", cat:"I"},
+      {texto:"Observa com calma antes de tomar qualquer decisão maior.", cat:"S"},
+      {texto:"Estuda os processos e números da equipe antes de agir.", cat:"C"}
+    ]},
+  { situacao: "Seu superior pede um resultado pra ontem, mas a equipe já está sobrecarregada.",
+    opcoes: [
+      {texto:"Redistribui tarefas na hora e cobra ritmo mais rápido da equipe.", cat:"D"},
+      {texto:"Conversa com a equipe, motiva, tenta unir todos pra dar conta.", cat:"I"},
+      {texto:"Tenta equilibrar sem sobrecarregar ninguém, mesmo sob pressão.", cat:"S"},
+      {texto:"Analisa a carga de trabalho antes de prometer o prazo pro superior.", cat:"C"}
+    ]},
+  { situacao: "Uma pessoa da equipe comete um erro que afeta um cliente importante.",
+    opcoes: [
+      {texto:"Corrige o erro na hora e já parte pra resolver com o cliente.", cat:"D"},
+      {texto:"Acalma a pessoa, sem deixar o clima pesado, e resolve junto.", cat:"I"},
+      {texto:"Trata com paciência, sem fazer a pessoa se sentir mal.", cat:"S"},
+      {texto:"Investiga o que causou o erro antes de qualquer correção.", cat:"C"}
+    ]},
+  { situacao: "Você precisa dar um feedback negativo pra alguém da equipe.",
+    opcoes: [
+      {texto:"Vai direto ao ponto, sem enrolar, focando na correção.", cat:"D"},
+      {texto:"Suaviza a conversa, começa por algo positivo antes da crítica.", cat:"I"},
+      {texto:"Adia um pouco, esperando o momento mais tranquilo pra falar.", cat:"S"},
+      {texto:"Prepara a conversa com exemplos concretos antes de falar.", cat:"C"}
+    ]},
+  { situacao: "Dois membros da equipe disputam quem fica com uma tarefa mais desejada.",
+    opcoes: [
+      {texto:"Decide na hora quem fica, sem prolongar a disputa.", cat:"D"},
+      {texto:"Conversa com os dois, tenta um acordo que agrade todo mundo.", cat:"I"},
+      {texto:"Prefere dividir a tarefa pra evitar desagradar qualquer um dos dois.", cat:"S"},
+      {texto:"Define com base em critério objetivo, tipo desempenho ou histórico.", cat:"C"}
+    ]},
+  { situacao: "A diretoria pede que você explique um resultado abaixo do esperado da equipe.",
+    opcoes: [
+      {texto:"Assume a responsabilidade e já apresenta o plano de correção.", cat:"D"},
+      {texto:"Explica com otimismo, focando no que pode melhorar daqui pra frente.", cat:"I"},
+      {texto:"Explica com calma, sem se abalar muito com a cobrança.", cat:"S"},
+      {texto:"Leva números detalhados pra sustentar a explicação.", cat:"C"}
+    ]},
+  { situacao: "Alguém da equipe pede um dia de folga em cima da hora.",
+    opcoes: [
+      {texto:"Avalia rápido o impacto e decide na hora, sem enrolar.", cat:"D"},
+      {texto:"Tenta ajudar, remaneja tarefas com bom humor pra cobrir a ausência.", cat:"I"},
+      {texto:"Aceita, mesmo que isso gere algum transtorno na rotina.", cat:"S"},
+      {texto:"Confere a política da empresa antes de aprovar o pedido.", cat:"C"}
+    ]},
+  { situacao: "Você percebe que uma pessoa da equipe está desmotivada há algumas semanas.",
+    opcoes: [
+      {texto:"Chama pra uma conversa direta perguntando o que está acontecendo.", cat:"D"},
+      {texto:"Se aproxima com leveza, tenta reconectar antes de tocar no assunto sério.", cat:"I"},
+      {texto:"Dá espaço, sem forçar, esperando a pessoa se abrir sozinha.", cat:"S"},
+      {texto:"Observa os números de desempenho antes de tirar conclusão.", cat:"C"}
+    ]},
+  { situacao: "Uma decisão sua não deu certo e a equipe percebeu o erro.",
+    opcoes: [
+      {texto:"Assume o erro rápido e já parte pra corrigir o rumo.", cat:"D"},
+      {texto:"Reconhece com leveza, sem se abalar muito na frente do time.", cat:"I"},
+      {texto:"Se sente mal, mas segue sem grande alarde.", cat:"S"},
+      {texto:"Analisa o que levou ao erro antes de decidir o próximo passo.", cat:"C"}
+    ]},
+  { situacao: "Você precisa cobrar uma meta de alguém que já está no limite de esforço.",
+    opcoes: [
+      {texto:"Cobra mesmo assim, focando no resultado que precisa ser entregue.", cat:"D"},
+      {texto:"Motiva com incentivo, tentando puxar mais um pouco com ânimo.", cat:"I"},
+      {texto:"Evita pressionar demais, com receio de sobrecarregar a pessoa.", cat:"S"},
+      {texto:"Revê os números pra ver se a meta ainda faz sentido.", cat:"C"}
+    ]},
+  { situacao: "Um membro da equipe espalha reclamação sobre você pros colegas.",
+    opcoes: [
+      {texto:"Chama a pessoa e trata o assunto de frente, sem rodeio.", cat:"D"},
+      {texto:"Tenta reconstruir a relação com conversa e aproximação.", cat:"I"},
+      {texto:"Prefere deixar passar, evitando alimentar o atrito.", cat:"S"},
+      {texto:"Busca entender a origem da reclamação antes de agir.", cat:"C"}
+    ]},
+  { situacao: "Sua equipe tem opiniões divididas sobre uma mudança de processo.",
+    opcoes: [
+      {texto:"Decide o caminho e comunica, mesmo sem consenso total.", cat:"D"},
+      {texto:"Reúne todos, conversa bastante até alinhar o time.", cat:"I"},
+      {texto:"Busca uma solução que desagrade o mínimo de pessoas possível.", cat:"S"},
+      {texto:"Avalia prós e contras de cada opinião antes de decidir.", cat:"C"}
+    ]},
+  { situacao: "Você precisa representar a equipe numa reunião com a diretoria.",
+    opcoes: [
+      {texto:"Vai direto com a posição da equipe, defendendo com firmeza.", cat:"D"},
+      {texto:"Usa a oportunidade pra criar boa relação com a diretoria também.", cat:"I"},
+      {texto:"Prefere seguir o roteiro combinado, sem se expor demais.", cat:"S"},
+      {texto:"Chega com dados prontos pra sustentar qualquer pergunta.", cat:"C"}
+    ]},
+  { situacao: "Alguém da equipe erra a mesma coisa pela segunda vez.",
+    opcoes: [
+      {texto:"É mais firme dessa vez, deixando claro que não pode repetir.", cat:"D"},
+      {texto:"Conversa de novo, tentando engajar de outro jeito.", cat:"I"},
+      {texto:"Dá mais uma chance, com paciência redobrada.", cat:"S"},
+      {texto:"Documenta o ocorrido antes de decidir o próximo passo.", cat:"C"}
+    ]},
+  { situacao: "Você recebe uma crítica do seu superior na frente de outras pessoas.",
+    opcoes: [
+      {texto:"Responde com firmeza ali mesmo, sem se encolher.", cat:"D"},
+      {texto:"Contorna com leveza, sem deixar o clima pesar.", cat:"I"},
+      {texto:"Aceita com calma, sem reagir muito na hora.", cat:"S"},
+      {texto:"Pede pra entender melhor os detalhes antes de responder.", cat:"C"}
+    ]},
+  { situacao: "Você precisa decidir como dividir uma carteira de clientes entre a equipe.",
+    opcoes: [
+      {texto:"Decide rápido com base no que julga mais justo.", cat:"D"},
+      {texto:"Conversa com todos pra chegar numa divisão que agrade o time.", cat:"I"},
+      {texto:"Mantém a divisão como já estava, evitando mudança brusca.", cat:"S"},
+      {texto:"Usa critério de desempenho e histórico pra dividir.", cat:"C"}
+    ]},
+  { situacao: "Uma pessoa nova entra na equipe e precisa de acompanhamento.",
+    opcoes: [
+      {texto:"Passa o essencial rápido e já deixa a pessoa praticar.", cat:"D"},
+      {texto:"Acompanha de perto, com bastante conversa e incentivo.", cat:"I"},
+      {texto:"Dá o tempo que a pessoa precisar, sem pressa nenhuma.", cat:"S"},
+      {texto:"Monta um passo a passo estruturado pro treinamento.", cat:"C"}
+    ]},
+  { situacao: "Você discorda de uma orientação que veio de cima, mas precisa repassar pra equipe.",
+    opcoes: [
+      {texto:"Repassa direto, mesmo discordando, focando na execução.", cat:"D"},
+      {texto:"Apresenta de forma positiva, mesmo com ressalva pessoal.", cat:"I"},
+      {texto:"Repassa sem muito comentário, evitando gerar desconforto.", cat:"S"},
+      {texto:"Busca entender melhor o motivo antes de repassar.", cat:"C"}
+    ]},
+  { situacao: "A equipe está desanimada depois de um mês fraco de resultado.",
+    opcoes: [
+      {texto:"Foca em ação prática pra reverter o quadro rápido.", cat:"D"},
+      {texto:"Investe em reanimar o time com conversa e incentivo.", cat:"I"},
+      {texto:"Dá suporte com calma, sem cobrar demais nesse momento.", cat:"S"},
+      {texto:"Analisa os números pra entender exatamente onde perdeu força.", cat:"C"}
+    ]},
+  { situacao: "Você precisa negar um pedido de alguém da equipe que insiste bastante.",
+    opcoes: [
+      {texto:"Nega direto, sem prolongar a negociação.", cat:"D"},
+      {texto:"Explica com jeito, tentando manter a relação leve.", cat:"I"},
+      {texto:"Adia a resposta, com receio de desagradar.", cat:"S"},
+      {texto:"Explica com base em regra ou critério, não em opinião pessoal.", cat:"C"}
+    ]},
+  { situacao: "No fim do mês, a equipe bate a meta e você tem que reconhecer o esforço.",
+    opcoes: [
+      {texto:"Reconhece rápido e já direciona o foco pro próximo desafio.", cat:"D"},
+      {texto:"Celebra com entusiasmo, valoriza cada um publicamente.", cat:"I"},
+      {texto:"Agradece com tranquilidade, sem grande alarde.", cat:"S"},
+      {texto:"Documenta o resultado e reconhece com base em dados de cada um.", cat:"C"}
+    ]}
+];
+
+const PERFIL_BLOCKS = {televendas: BLOCKS_TELEVENDAS, lideranca: BLOCKS_LIDERANCA};
+const PERFIL_LABELS = {televendas: "Televendas", lideranca: "Liderança (Supervisão/Coordenação)"};
+
 const CAT_LABELS = {D:"Dominância", I:"Influência", S:"Estabilidade", C:"Conformidade"};
 const CAT_COLOR  = {D:"var(--d-color)", I:"var(--i-color)", S:"var(--s-color)", C:"var(--c-color)"};
 const CAT_TEXT = {
@@ -409,8 +597,9 @@ const CAT_TEXT = {
   C: "Preciso e orientado a processo — ótimo para controle de margem, CRM correto e conformidade regulatória (relevante em farma). Pode travar em análise excessiva antes de decidir e sofrer com a pressão social da venda."
 };
 
-function buildBlocks(){
-  return BLOCKS.map(block => {
+function buildBlocks(perfilTeste){
+  const source = PERFIL_BLOCKS[perfilTeste] || BLOCKS_TELEVENDAS;
+  return source.map(block => {
     const words = block.opcoes.map(o => ({word:o.texto, cat:o.cat}));
     for(let j=words.length-1;j>0;j--){
       const k = Math.floor(Math.random()*(j+1));
@@ -420,11 +609,11 @@ function buildBlocks(){
   });
 }
 
-let blocks = buildBlocks();
+let blocks = buildBlocks('televendas');
 let current = 0;
 let answers = []; // {mais:cat, menos:cat}
 let sel = {mais:null, menos:null}; // index within current block words[]
-let participante = {nome:'', cargo:''};
+let participante = {nome:'', cargo:'', perfilTeste:'televendas'};
 
 const app = document.getElementById('app');
 
@@ -448,6 +637,13 @@ function renderIntro(){
           <input type="text" id="inpCargo" placeholder="Ex.: Vendedor de campo" maxlength="120" autocomplete="off">
         </div>
       </div>
+      <div class="field">
+        <div class="instr">Perfil do teste</div>
+        <select id="inpPerfil">
+          <option value="televendas">Televendas</option>
+          <option value="lideranca">Liderança (Supervisão/Coordenação)</option>
+        </select>
+      </div>
       <button class="btn" id="startBtn" disabled onclick="startQuiz()">Iniciar avaliação →</button>
       <div style="margin-top:18px;">
         <button class="link-btn" onclick="renderSavedResults()">Ver resultados salvos →</button>
@@ -456,12 +652,14 @@ function renderIntro(){
   `;
   const inpNome = document.getElementById('inpNome');
   const inpCargo = document.getElementById('inpCargo');
+  const inpPerfil = document.getElementById('inpPerfil');
   const startBtn = document.getElementById('startBtn');
   function checkValid(){
     startBtn.disabled = !(inpNome.value.trim().length>0 && inpCargo.value.trim().length>0);
   }
   inpNome.value = participante.nome;
   inpCargo.value = participante.cargo;
+  inpPerfil.value = participante.perfilTeste || 'televendas';
   inpNome.addEventListener('input', checkValid);
   inpCargo.addEventListener('input', checkValid);
   checkValid();
@@ -470,10 +668,11 @@ function renderIntro(){
 function startQuiz(){
   const nome = document.getElementById('inpNome').value.trim();
   const cargo = document.getElementById('inpCargo').value.trim();
+  const perfilTeste = document.getElementById('inpPerfil').value;
   if(!nome || !cargo) return;
-  participante = {nome, cargo};
+  participante = {nome, cargo, perfilTeste};
   current = 0; answers = []; sel = {mais:null, menos:null};
-  blocks = buildBlocks();
+  blocks = buildBlocks(perfilTeste);
   renderQuiz();
 }
 
@@ -587,6 +786,7 @@ function renderResults(){
   salvarResultado({
     nome: participante.nome,
     cargo: participante.cargo,
+    perfilTeste: participante.perfilTeste,
     scores: net,
     perfilPrimario: primary,
     perfilSecundario: secondary
@@ -675,10 +875,12 @@ function buildResultsTable(list){
     const dataFmt = r.data ? new Date(r.data).toLocaleString('pt-BR') : '—';
     const primCat = r.perfilPrimario;
     const primColor = CAT_COLOR[primCat] || 'var(--ink-soft)';
+    const perfilTesteLabel = PERFIL_LABELS[r.perfilTeste] || r.perfilTeste || '—';
     rows += `
       <tr>
         <td>${escapeHtml(r.nome)}</td>
         <td>${escapeHtml(r.cargo)}</td>
+        <td>${escapeHtml(perfilTesteLabel)}</td>
         <td><span class="tag-cat" style="background:${primColor}">${escapeHtml(primCat || '—')}</span>${r.perfilSecundario ? ' / '+escapeHtml(r.perfilSecundario) : ''}</td>
         <td>${fmtScore(s.D)}</td>
         <td>${fmtScore(s.I)}</td>
@@ -692,7 +894,7 @@ function buildResultsTable(list){
     <div class="table-wrap">
       <table class="results-table">
         <thead>
-          <tr><th>Nome</th><th>Cargo</th><th>Perfil</th><th>D</th><th>I</th><th>S</th><th>C</th><th>Data</th></tr>
+          <tr><th>Nome</th><th>Cargo</th><th>Perfil do teste</th><th>Perfil DISC</th><th>D</th><th>I</th><th>S</th><th>C</th><th>Data</th></tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>

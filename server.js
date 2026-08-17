@@ -65,6 +65,8 @@ function isFiniteNumber(v){
   return typeof v === 'number' && Number.isFinite(v);
 }
 
+const PERFIS_TESTE_VALIDOS = ['televendas', 'lideranca'];
+
 const server = http.createServer(async (req, res) => {
   const urlPath = req.url.split('?')[0];
 
@@ -80,15 +82,16 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       const nome = isNonEmptyString(body.nome) ? body.nome.trim().slice(0, 120) : null;
       const cargo = isNonEmptyString(body.cargo) ? body.cargo.trim().slice(0, 120) : null;
+      const perfilTeste = PERFIS_TESTE_VALIDOS.includes(body.perfilTeste) ? body.perfilTeste : null;
       const scores = body.scores || {};
       const scoresValid = ['D','I','S','C'].every(k => isFiniteNumber(scores[k]));
-      if(!nome || !cargo || !scoresValid){
-        sendJSON(res, 400, {erro: 'Dados inválidos. Envie nome, cargo e scores D/I/S/C numéricos.'});
+      if(!nome || !cargo || !perfilTeste || !scoresValid){
+        sendJSON(res, 400, {erro: 'Dados inválidos. Envie nome, cargo, perfilTeste (televendas|lideranca) e scores D/I/S/C numéricos.'});
         return;
       }
       const registro = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-        nome, cargo,
+        nome, cargo, perfilTeste,
         scores: {D: scores.D, I: scores.I, S: scores.S, C: scores.C},
         perfilPrimario: isNonEmptyString(body.perfilPrimario) ? body.perfilPrimario : null,
         perfilSecundario: isNonEmptyString(body.perfilSecundario) ? body.perfilSecundario : null,
