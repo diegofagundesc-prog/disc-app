@@ -237,16 +237,16 @@ const BLOCKS = [
       {texto:"Escuta com calma, sem pressa, até o cliente se sentir ouvido.", cat:"S"},
       {texto:"Pede pra conferir a nota fiscal antes de prometer qualquer coisa.", cat:"C"}
     ]},
-  { situacao: "Você entra numa farmácia nova, sem histórico de compra com você.",
+  { situacao: "Você liga pela primeira vez pra uma farmácia nova, sem histórico de compra com você.",
     opcoes: [
-      {texto:"Vai direto ao ponto, oferece a melhor condição e já fecha o primeiro pedido.", cat:"D"},
+      {texto:"Vai direto ao ponto, oferece a melhor condição e já tenta fechar o primeiro pedido na ligação.", cat:"D"},
       {texto:"Puxa conversa, cria vínculo, deixa o cliente confortável antes de falar de preço.", cat:"I"},
       {texto:"Espera o cliente abrir espaço, sem forçar, e vai com calma na apresentação.", cat:"S"},
       {texto:"Levanta o histórico de compra da região antes de montar a proposta.", cat:"C"}
     ]},
   { situacao: "Sua meta do mês está abaixo do esperado, faltando uma semana.",
     opcoes: [
-      {texto:"Aumenta o ritmo de visitas e cobra fechamento com urgência dos clientes.", cat:"D"},
+      {texto:"Aumenta o ritmo de ligações e cobra fechamento com urgência dos clientes.", cat:"D"},
       {texto:"Liga pros clientes de confiança e usa a relação pra fechar rápido.", cat:"I"},
       {texto:"Segue a rotina normal, sem alterar o ritmo, confiando que vai fechar.", cat:"S"},
       {texto:"Analisa os números por cliente pra ver onde ainda dá pra puxar.", cat:"C"}
@@ -279,10 +279,10 @@ const BLOCKS = [
       {texto:"Espera mais um pouco, evitando criar atrito com o cliente.", cat:"S"},
       {texto:"Levanta o histórico de pagamento antes de decidir como cobrar.", cat:"C"}
     ]},
-  { situacao: "Seu supervisor pede pra você mudar a rota de visitas essa semana.",
+  { situacao: "Seu supervisor pede pra você mudar a lista de clientes que você liga essa semana.",
     opcoes: [
-      {texto:"Já reorganiza a agenda sozinho e informa depois.", cat:"D"},
-      {texto:"Conversa com o supervisor pra entender o motivo e concorda animado.", cat:"I"},
+      {texto:"Já reorganiza a lista de ligações sozinha e informa depois.", cat:"D"},
+      {texto:"Conversa com o supervisor pra entender o motivo e concorda animada.", cat:"I"},
       {texto:"Aceita a mudança, mesmo preferindo manter a rotina de sempre.", cat:"S"},
       {texto:"Pede detalhes de como isso afeta os compromissos já marcados.", cat:"C"}
     ]},
@@ -335,10 +335,10 @@ const BLOCKS = [
       {texto:"Fica incomodado, mas segue a rotina normal sem se abalar muito.", cat:"S"},
       {texto:"Analisa o que levou à perda antes de decidir o próximo passo.", cat:"C"}
     ]},
-  { situacao: "A empresa pede pra expandir a atuação pra uma cidade nova.",
+  { situacao: "A empresa pede pra você começar a atender uma região nova por telefone.",
     opcoes: [
       {texto:"Topa na hora, vê como oportunidade de crescer resultado.", cat:"D"},
-      {texto:"Fica animado com a novidade e já pensa em quem conhece na região.", cat:"I"},
+      {texto:"Fica animada com a novidade e já pensa em quem conhece na região.", cat:"I"},
       {texto:"Prefere ir com calma, entendendo bem antes de se comprometer.", cat:"S"},
       {texto:"Pede dados da região antes de decidir se topa ou não.", cat:"C"}
     ]},
@@ -356,12 +356,12 @@ const BLOCKS = [
       {texto:"Escuta a reclamação com paciência antes de qualquer explicação.", cat:"S"},
       {texto:"Mostra a tabela de reajuste com os números que justificam.", cat:"C"}
     ]},
-  { situacao: "Seu dia está corrido e imprevistos aparecem fora da agenda planejada.",
+  { situacao: "Seu dia está corrido e imprevistos aparecem fora da lista de ligações planejada.",
     opcoes: [
-      {texto:"Reorganiza na hora e segue resolvendo tudo em ritmo acelerado.", cat:"D"},
+      {texto:"Reorganiza na hora e segue ligando em ritmo acelerado.", cat:"D"},
       {texto:"Se adapta com bom humor, mesmo com a correria do dia.", cat:"I"},
-      {texto:"Prefere seguir a agenda como estava, ajustando o mínimo possível.", cat:"S"},
-      {texto:"Reorganiza a agenda com calma, revendo cada compromisso com cuidado.", cat:"C"}
+      {texto:"Prefere seguir a lista como estava, ajustando o mínimo possível.", cat:"S"},
+      {texto:"Reorganiza a lista com calma, revendo cada ligação com cuidado.", cat:"C"}
     ]},
   { situacao: "Um cliente pede um produto que não é da sua linha de venda.",
     opcoes: [
@@ -377,7 +377,7 @@ const BLOCKS = [
       {texto:"Aceita a mudança, mesmo sem gostar, sem grande reação.", cat:"S"},
       {texto:"Pede os detalhes por escrito antes de tirar qualquer conclusão.", cat:"C"}
     ]},
-  { situacao: "Você recebe a visita de um cliente insatisfeito direto na base.",
+  { situacao: "Um cliente insatisfeito liga direto reclamando, antes mesmo de você ligar pra ele.",
     opcoes: [
       {texto:"Vai direto resolver o problema, sem enrolação.", cat:"D"},
       {texto:"Recebe bem, conversa bastante até o cliente se acalmar.", cat:"I"},
@@ -394,7 +394,7 @@ const BLOCKS = [
   { situacao: "No fim do mês, sua meta bateu e sobrou tempo livre.",
     opcoes: [
       {texto:"Já usa o tempo pra buscar cliente novo pro próximo mês.", cat:"D"},
-      {texto:"Aproveita pra fortalecer relação com os clientes, passando pra bater um papo.", cat:"I"},
+      {texto:"Aproveita pra fortalecer relação com os clientes, ligando só pra bater um papo.", cat:"I"},
       {texto:"Aproveita pra organizar as coisas com calma, sem pressa.", cat:"S"},
       {texto:"Usa o tempo pra revisar relatórios e conferir números do mês.", cat:"C"}
     ]}
