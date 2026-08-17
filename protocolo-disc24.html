@@ -645,9 +645,6 @@ function renderIntro(){
         </select>
       </div>
       <button class="btn" id="startBtn" disabled onclick="startQuiz()">Iniciar avaliação →</button>
-      <div style="margin-top:18px;">
-        <button class="link-btn" onclick="renderSavedResults()">Ver resultados salvos →</button>
-      </div>
     </div>
   `;
   const inpNome = document.getElementById('inpNome');
@@ -777,7 +774,6 @@ function renderResults(){
       </div>
       <div class="footer-actions no-print">
         <button class="btn-ghost btn" onclick="renderIntro()">Novo teste</button>
-        <button class="btn-ghost btn" onclick="renderSavedResults()">Ver resultados salvos</button>
         <button class="btn" onclick="window.print()">Exportar / imprimir</button>
       </div>
     </div>
@@ -903,7 +899,11 @@ function buildResultsTable(list){
   `;
 }
 
-renderIntro();
+if(location.pathname === '/resultados'){
+  renderSavedResults();
+} else {
+  renderIntro();
+}
 </script>
 </body>
 </html>

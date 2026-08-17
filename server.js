@@ -15,10 +15,20 @@ const DATA_FILE = path.join(DATA_DIR, 'resultados.json');
 
 const AUTH_USER = 'disc';
 const AUTH_PASSWORD = process.env.DISC_APP_PASSWORD;
+const AUTH_REALM = 'Protocolo DISC-24';
+
+const ADMIN_USER = 'admin';
+const ADMIN_PASSWORD = process.env.DISC_ADMIN_PASSWORD;
+const ADMIN_REALM = 'Protocolo DISC-24 Admin';
 
 if(!AUTH_PASSWORD){
   console.error('ERRO: defina a variável de ambiente DISC_APP_PASSWORD antes de iniciar o servidor.');
-  console.error('Ex.: DISC_APP_PASSWORD="sua-senha" node server.js');
+  console.error('Ex.: DISC_APP_PASSWORD="sua-senha" DISC_ADMIN_PASSWORD="outra-senha" node server.js');
+  process.exit(1);
+}
+if(!ADMIN_PASSWORD){
+  console.error('ERRO: defina a variável de ambiente DISC_ADMIN_PASSWORD antes de iniciar o servidor.');
+  console.error('Ex.: DISC_APP_PASSWORD="sua-senha" DISC_ADMIN_PASSWORD="outra-senha" node server.js');
   process.exit(1);
 }
 
@@ -84,7 +94,7 @@ function timingSafeEqualStr(a, b){
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-function isAuthorized(req){
+function isAuthorizedFor(req, user, password){
   const header = req.headers['authorization'] || '';
   if(!header.startsWith('Basic ')) return false;
   let decoded;
@@ -95,26 +105,39 @@ function isAuthorized(req){
   }
   const sep = decoded.indexOf(':');
   if(sep === -1) return false;
-  const user = decoded.slice(0, sep);
-  const pass = decoded.slice(sep + 1);
-  return timingSafeEqualStr(user, AUTH_USER) && timingSafeEqualStr(pass, AUTH_PASSWORD);
+  const givenUser = decoded.slice(0, sep);
+  const givenPass = decoded.slice(sep + 1);
+  return timingSafeEqualStr(givenUser, user) && timingSafeEqualStr(givenPass, password);
 }
 
-function requireAuth(res){
+function requireAuth(res, realm){
   res.writeHead(401, {
     'Content-Type': 'text/plain; charset=utf-8',
-    'WWW-Authenticate': 'Basic realm="Protocolo DISC-24"'
+    'WWW-Authenticate': `Basic realm="${realm}"`
   });
   res.end('Autenticação necessária.');
 }
 
-const server = http.createServer(async (req, res) => {
-  if(!isAuthorized(req)){
-    requireAuth(res);
-    return;
-  }
+// Somente leitura de resultados (tela "Resultados salvos" e sua API) exige a senha de admin;
+// o restante do app (fazer o teste, salvar um resultado novo) usa a senha comum.
+function isRotaAdmin(method, urlPath){
+  return method === 'GET' && (urlPath === '/resultados' || urlPath === '/api/resultados');
+}
 
+const server = http.createServer(async (req, res) => {
   const urlPath = req.url.split('?')[0];
+
+  if(isRotaAdmin(req.method, urlPath)){
+    if(!isAuthorizedFor(req, ADMIN_USER, ADMIN_PASSWORD)){
+      requireAuth(res, ADMIN_REALM);
+      return;
+    }
+  } else {
+    if(!isAuthorizedFor(req, AUTH_USER, AUTH_PASSWORD)){
+      requireAuth(res, AUTH_REALM);
+      return;
+    }
+  }
 
   if(req.method === 'GET' && urlPath === '/api/resultados'){
     const list = readResultados();
@@ -153,7 +176,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if(req.method === 'GET' && (urlPath === '/' || urlPath === '/protocolo-disc24.html')){
+  if(req.method === 'GET' && (urlPath === '/' || urlPath === '/protocolo-disc24.html' || urlPath === '/resultados')){
     fs.readFile(HTML_FILE, (err, data) => {
       if(err){ res.writeHead(500); res.end('Erro ao carregar o app.'); return; }
       res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
@@ -169,6 +192,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   ensureDataFile();
   console.log(`Protocolo DISC-24 rodando em http://localhost:${PORT}`);
-  console.log(`Acesso protegido por senha — usuário: ${AUTH_USER}`);
+  console.log(`Teste protegido por senha — usuário: ${AUTH_USER}`);
+  console.log(`Resultados salvos (/resultados) protegidos por senha — usuário: ${ADMIN_USER}`);
   console.log(`Resultados salvos em ${DATA_FILE}`);
 });
