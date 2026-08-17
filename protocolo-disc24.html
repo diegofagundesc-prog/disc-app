@@ -117,19 +117,30 @@
     color:var(--ink-soft);
     margin-bottom:10px;
   }
+  .situacao-box{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size:17px;
+    line-height:1.45;
+    color:var(--ink);
+    background:var(--bg);
+    border-left:3px solid var(--ink);
+    padding:14px 16px;
+    margin-bottom:22px;
+  }
   .chip-row{
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:1fr;
     gap:10px;
     margin-bottom:26px;
   }
   .chip{
     border:1px solid var(--line);
     border-radius:var(--radius);
-    padding:14px 14px;
+    padding:12px 14px;
     background:#fff;
     cursor:pointer;
-    font-size:15px;
+    font-size:14px;
+    line-height:1.4;
     text-align:left;
     transition:border-color .12s ease, background .12s ease;
   }
@@ -210,7 +221,6 @@
     .doc{border:none; box-shadow:none;}
   }
   @media (max-width:480px){
-    .chip-row{grid-template-columns:1fr;}
     .field-row{grid-template-columns:1fr;}
   }
 </style>
@@ -219,10 +229,176 @@
 <div class="wrap"><div class="doc" id="app"></div></div>
 
 <script>
-const D_WORDS = ["Decidido","Direto","Competitivo","Ousado","Enérgico","Firme","Independente","Assertivo","Desafiador","Determinado","Impositivo","Audacioso","Confiante","Exigente","Resoluto","Pioneiro","Corajoso","Autoritário","Ambicioso","Persistente","Forte","Dominante","Vigoroso","Impaciente"];
-const I_WORDS = ["Comunicativo","Entusiasmado","Sociável","Persuasivo","Otimista","Expressivo","Espontâneo","Amigável","Carismático","Falante","Animado","Extrovertido","Caloroso","Inspirador","Divertido","Popular","Envolvente","Charmoso","Vibrante","Encantador","Efusivo","Cativante","Descontraído","Alegre"];
-const S_WORDS = ["Paciente","Calmo","Leal","Constante","Confiável","Gentil","Cooperativo","Estável","Ponderado","Amável","Consistente","Prestativo","Sereno","Dedicado","Compreensivo","Tranquilo","Solidário","Acolhedor","Modesto","Previsível","Harmonioso","Atencioso","Discreto","Conciliador"];
-const C_WORDS = ["Preciso","Analítico","Cuidadoso","Organizado","Detalhista","Sistemático","Criterioso","Metódico","Cauteloso","Lógico","Disciplinado","Exato","Rigoroso","Formal","Prudente","Meticuloso","Correto","Perfeccionista","Ordenado","Racional","Minucioso","Reservado","Diplomático","Investigativo"];
+const BLOCKS = [
+  { situacao: "Um cliente liga reclamando que o pedido chegou errado.",
+    opcoes: [
+      {texto:"Resolve na hora, promete a troca e já parte pro próximo cliente.", cat:"D"},
+      {texto:"Acalma o cliente conversando, brincando, até ele esquecer a chateação.", cat:"I"},
+      {texto:"Escuta com calma, sem pressa, até o cliente se sentir ouvido.", cat:"S"},
+      {texto:"Pede pra conferir a nota fiscal antes de prometer qualquer coisa.", cat:"C"}
+    ]},
+  { situacao: "Você entra numa farmácia nova, sem histórico de compra com você.",
+    opcoes: [
+      {texto:"Vai direto ao ponto, oferece a melhor condição e já fecha o primeiro pedido.", cat:"D"},
+      {texto:"Puxa conversa, cria vínculo, deixa o cliente confortável antes de falar de preço.", cat:"I"},
+      {texto:"Espera o cliente abrir espaço, sem forçar, e vai com calma na apresentação.", cat:"S"},
+      {texto:"Levanta o histórico de compra da região antes de montar a proposta.", cat:"C"}
+    ]},
+  { situacao: "Sua meta do mês está abaixo do esperado, faltando uma semana.",
+    opcoes: [
+      {texto:"Aumenta o ritmo de visitas e cobra fechamento com urgência dos clientes.", cat:"D"},
+      {texto:"Liga pros clientes de confiança e usa a relação pra fechar rápido.", cat:"I"},
+      {texto:"Segue a rotina normal, sem alterar o ritmo, confiando que vai fechar.", cat:"S"},
+      {texto:"Analisa os números por cliente pra ver onde ainda dá pra puxar.", cat:"C"}
+    ]},
+  { situacao: "Um cliente grande pede uma condição especial fora da tabela.",
+    opcoes: [
+      {texto:"Negocia direto com o cliente e decide sozinho até onde pode ir.", cat:"D"},
+      {texto:"Conversa, entende o motivo do pedido e busca um meio-termo amigável.", cat:"I"},
+      {texto:"Prefere não se comprometer sozinho e espera orientação antes de responder.", cat:"S"},
+      {texto:"Pede pra calcular o impacto na margem antes de dar qualquer resposta.", cat:"C"}
+    ]},
+  { situacao: "Dois colegas de equipe discutem sobre quem atende um cliente.",
+    opcoes: [
+      {texto:"Entra na conversa e decide na hora quem fica com o cliente.", cat:"D"},
+      {texto:"Brinca, descontrai o clima e ajuda os dois a se entenderem.", cat:"I"},
+      {texto:"Fica de fora, prefere que os dois resolvam entre si com calma.", cat:"S"},
+      {texto:"Sugere olhar a regra de divisão de carteira antes de decidir.", cat:"C"}
+    ]},
+  { situacao: "A empresa lança uma marca própria nova pra você vender.",
+    opcoes: [
+      {texto:"Já sai testando com os clientes mais receptivos pra ver o resultado.", cat:"D"},
+      {texto:"Fica animado e conta pra todo mundo, gerando burburinho antes de vender.", cat:"I"},
+      {texto:"Espera entender bem o produto antes de oferecer pro cliente.", cat:"S"},
+      {texto:"Lê a ficha técnica toda antes de apresentar pro primeiro cliente.", cat:"C"}
+    ]},
+  { situacao: "Um cliente está devendo há dois meses e evita sua ligação.",
+    opcoes: [
+      {texto:"Liga direto e cobra sem rodeio, marcando prazo pra resolver.", cat:"D"},
+      {texto:"Tenta manter a relação boa enquanto busca um jeito de receber.", cat:"I"},
+      {texto:"Espera mais um pouco, evitando criar atrito com o cliente.", cat:"S"},
+      {texto:"Levanta o histórico de pagamento antes de decidir como cobrar.", cat:"C"}
+    ]},
+  { situacao: "Seu supervisor pede pra você mudar a rota de visitas essa semana.",
+    opcoes: [
+      {texto:"Já reorganiza a agenda sozinho e informa depois.", cat:"D"},
+      {texto:"Conversa com o supervisor pra entender o motivo e concorda animado.", cat:"I"},
+      {texto:"Aceita a mudança, mesmo preferindo manter a rotina de sempre.", cat:"S"},
+      {texto:"Pede detalhes de como isso afeta os compromissos já marcados.", cat:"C"}
+    ]},
+  { situacao: "Um concorrente oferece desconto maior pro mesmo cliente que você atende.",
+    opcoes: [
+      {texto:"Vai atrás do cliente e briga pela venda com nova proposta.", cat:"D"},
+      {texto:"Reforça o relacionamento e a confiança construída com o cliente.", cat:"I"},
+      {texto:"Mantém a postura de sempre, sem correr atrás de forma agressiva.", cat:"S"},
+      {texto:"Compara as condições e monta uma contraproposta com números.", cat:"C"}
+    ]},
+  { situacao: "Você recebe um feedback do seu gestor sobre um ponto a melhorar.",
+    opcoes: [
+      {texto:"Ouve rápido, já pensa em como corrigir e segue em frente.", cat:"D"},
+      {texto:"Conversa bastante sobre o assunto e busca entender o lado do gestor.", cat:"I"},
+      {texto:"Aceita com tranquilidade, mesmo sem gostar muito do momento.", cat:"S"},
+      {texto:"Pede exemplos concretos pra entender exatamente o que precisa mudar.", cat:"C"}
+    ]},
+  { situacao: "Falta um produto importante no estoque e o cliente já contava com ele.",
+    opcoes: [
+      {texto:"Já busca alternativa com outro cliente ou outro produto na hora.", cat:"D"},
+      {texto:"Liga pro cliente e contorna a situação de forma tranquila e simpática.", cat:"I"},
+      {texto:"Avisa o cliente com calma e espera o produto voltar ao estoque.", cat:"S"},
+      {texto:"Verifica a previsão exata de reposição antes de dar qualquer prazo.", cat:"C"}
+    ]},
+  { situacao: "Você tem que treinar num sistema novo de CRM (Alltomatize).",
+    opcoes: [
+      {texto:"Mexe direto no sistema, testando por conta própria até aprender.", cat:"D"},
+      {texto:"Pergunta pros colegas e troca dica enquanto aprende junto com o grupo.", cat:"I"},
+      {texto:"Segue o passo a passo do treinamento com calma, sem pressa.", cat:"S"},
+      {texto:"Lê o manual todo antes de começar a usar o sistema.", cat:"C"}
+    ]},
+  { situacao: "Um cliente indeciso está demorando pra fechar um pedido grande.",
+    opcoes: [
+      {texto:"Pressiona com um prazo pra decisão, criando senso de urgência.", cat:"D"},
+      {texto:"Investe na relação, mostra os benefícios com entusiasmo até ele decidir.", cat:"I"},
+      {texto:"Dá tempo ao cliente, sem pressionar, esperando ele se sentir seguro.", cat:"S"},
+      {texto:"Apresenta números e comparativos pra embasar a decisão dele.", cat:"C"}
+    ]},
+  { situacao: "A equipe organiza uma confraternização de fim de ano.",
+    opcoes: [
+      {texto:"Ajuda a organizar, mas prefere só aparecer no dia do evento.", cat:"D"},
+      {texto:"Se envolve animado, ajuda a organizar e puxa todo mundo pra participar.", cat:"I"},
+      {texto:"Prefere um papel discreto, ajudando nos bastidores sem se destacar.", cat:"S"},
+      {texto:"Cuida da parte prática — lista, orçamento, logística do evento.", cat:"C"}
+    ]},
+  { situacao: "Você perde um cliente antigo pra concorrência.",
+    opcoes: [
+      {texto:"Já parte pra buscar cliente novo que cubra a perda rapidamente.", cat:"D"},
+      {texto:"Tenta reconquistar o cliente, insistindo na relação construída ao longo do tempo.", cat:"I"},
+      {texto:"Fica incomodado, mas segue a rotina normal sem se abalar muito.", cat:"S"},
+      {texto:"Analisa o que levou à perda antes de decidir o próximo passo.", cat:"C"}
+    ]},
+  { situacao: "A empresa pede pra expandir a atuação pra uma cidade nova.",
+    opcoes: [
+      {texto:"Topa na hora, vê como oportunidade de crescer resultado.", cat:"D"},
+      {texto:"Fica animado com a novidade e já pensa em quem conhece na região.", cat:"I"},
+      {texto:"Prefere ir com calma, entendendo bem antes de se comprometer.", cat:"S"},
+      {texto:"Pede dados da região antes de decidir se topa ou não.", cat:"C"}
+    ]},
+  { situacao: "Numa reunião de equipe, o supervisor pergunta a opinião de todos sobre uma meta nova.",
+    opcoes: [
+      {texto:"Dá a opinião direto, defendendo o que acha certo com firmeza.", cat:"D"},
+      {texto:"Fala animado, tenta trazer o grupo pro seu lado da conversa.", cat:"I"},
+      {texto:"Prefere ouvir os outros primeiro antes de se posicionar.", cat:"S"},
+      {texto:"Pondera prós e contras antes de dar uma resposta.", cat:"C"}
+    ]},
+  { situacao: "Você recebe uma reclamação de um cliente sobre o preço estar mais alto que antes.",
+    opcoes: [
+      {texto:"Explica o motivo de forma direta e segue pra fechar o pedido.", cat:"D"},
+      {texto:"Conversa, valoriza a relação e contorna com simpatia.", cat:"I"},
+      {texto:"Escuta a reclamação com paciência antes de qualquer explicação.", cat:"S"},
+      {texto:"Mostra a tabela de reajuste com os números que justificam.", cat:"C"}
+    ]},
+  { situacao: "Seu dia está corrido e imprevistos aparecem fora da agenda planejada.",
+    opcoes: [
+      {texto:"Reorganiza na hora e segue resolvendo tudo em ritmo acelerado.", cat:"D"},
+      {texto:"Se adapta com bom humor, mesmo com a correria do dia.", cat:"I"},
+      {texto:"Prefere seguir a agenda como estava, ajustando o mínimo possível.", cat:"S"},
+      {texto:"Reorganiza a agenda com calma, revendo cada compromisso com cuidado.", cat:"C"}
+    ]},
+  { situacao: "Um cliente pede um produto que não é da sua linha de venda.",
+    opcoes: [
+      {texto:"Já busca uma alternativa própria pra oferecer no lugar.", cat:"D"},
+      {texto:"Conversa com o cliente pra entender a necessidade por trás do pedido.", cat:"I"},
+      {texto:"Informa com calma que não trabalha com aquele produto.", cat:"S"},
+      {texto:"Verifica no catálogo se existe algo parecido antes de responder.", cat:"C"}
+    ]},
+  { situacao: "A empresa muda a política de comissão sem muito aviso.",
+    opcoes: [
+      {texto:"Já calcula o impacto e ajusta a estratégia de vendas na hora.", cat:"D"},
+      {texto:"Conversa com os colegas pra entender como todos estão reagindo.", cat:"I"},
+      {texto:"Aceita a mudança, mesmo sem gostar, sem grande reação.", cat:"S"},
+      {texto:"Pede os detalhes por escrito antes de tirar qualquer conclusão.", cat:"C"}
+    ]},
+  { situacao: "Você recebe a visita de um cliente insatisfeito direto na base.",
+    opcoes: [
+      {texto:"Vai direto resolver o problema, sem enrolação.", cat:"D"},
+      {texto:"Recebe bem, conversa bastante até o cliente se acalmar.", cat:"I"},
+      {texto:"Escuta com atenção e paciência até o fim da reclamação.", cat:"S"},
+      {texto:"Pede pra revisar o histórico do pedido antes de qualquer resposta.", cat:"C"}
+    ]},
+  { situacao: "Você precisa aprender um produto técnico novo (linha farmacêutica) rapidinho antes de vender.",
+    opcoes: [
+      {texto:"Aprende o essencial rápido e já vai testar com o cliente.", cat:"D"},
+      {texto:"Pergunta pros colegas mais experientes, trocando ideia sobre o produto.", cat:"I"},
+      {texto:"Estuda com calma, no seu tempo, antes de se sentir seguro.", cat:"S"},
+      {texto:"Lê toda a bula e ficha técnica antes de oferecer o produto.", cat:"C"}
+    ]},
+  { situacao: "No fim do mês, sua meta bateu e sobrou tempo livre.",
+    opcoes: [
+      {texto:"Já usa o tempo pra buscar cliente novo pro próximo mês.", cat:"D"},
+      {texto:"Aproveita pra fortalecer relação com os clientes, passando pra bater um papo.", cat:"I"},
+      {texto:"Aproveita pra organizar as coisas com calma, sem pressa.", cat:"S"},
+      {texto:"Usa o tempo pra revisar relatórios e conferir números do mês.", cat:"C"}
+    ]}
+];
 
 const CAT_LABELS = {D:"Dominância", I:"Influência", S:"Estabilidade", C:"Conformidade"};
 const CAT_COLOR  = {D:"var(--d-color)", I:"var(--i-color)", S:"var(--s-color)", C:"var(--c-color)"};
@@ -234,21 +410,14 @@ const CAT_TEXT = {
 };
 
 function buildBlocks(){
-  const blocks = [];
-  for(let i=0;i<24;i++){
-    const words = [
-      {word:D_WORDS[i], cat:'D'},
-      {word:I_WORDS[i], cat:'I'},
-      {word:S_WORDS[i], cat:'S'},
-      {word:C_WORDS[i], cat:'C'}
-    ];
+  return BLOCKS.map(block => {
+    const words = block.opcoes.map(o => ({word:o.texto, cat:o.cat}));
     for(let j=words.length-1;j>0;j--){
       const k = Math.floor(Math.random()*(j+1));
       [words[j],words[k]] = [words[k],words[j]];
     }
-    blocks.push(words);
-  }
-  return blocks;
+    return {situacao: block.situacao, words};
+  });
 }
 
 let blocks = buildBlocks();
@@ -309,7 +478,8 @@ function startQuiz(){
 }
 
 function renderQuiz(){
-  const words = blocks[current];
+  const block = blocks[current];
+  const words = block.words;
   let ticks = '';
   for(let i=0;i<24;i++){
     ticks += `<div class="tick ${i<current ? 'done':''}"></div>`;
@@ -324,6 +494,7 @@ function renderQuiz(){
       <div class="progress-row">
         <div class="progress-track">${ticks}</div>
       </div>
+      <div class="situacao-box">${escapeHtml(block.situacao)}</div>
       <div class="instr">O que MAIS te representa</div>
       <div class="chip-row" id="row-mais"></div>
       <div class="instr">O que MENOS te representa</div>
@@ -355,7 +526,7 @@ function renderQuiz(){
 }
 
 function nextBlock(){
-  const words = blocks[current];
+  const words = blocks[current].words;
   answers.push({mais: words[sel.mais].cat, menos: words[sel.menos].cat});
   sel = {mais:null, menos:null};
   current++;
